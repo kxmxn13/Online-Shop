@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หลังบ้าน - Mei Bakery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }</style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <nav class="bg-gray-900 text-white p-4 sticky top-0 z-10 shadow-lg">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <span class="text-2xl">👩🏻‍🍳</span> <span class="text-pink-400">Mei Bakery</span> Dashboard
+            </h1>
+            <a href="index.html" class="text-sm bg-gray-700 px-4 py-2 rounded-xl font-medium hover:bg-gray-600 transition shadow">👀 ดูหน้าร้าน</a>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-4 mt-6 flex-grow w-full">
+        <!-- Dashboard สต็อกสินค้า -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm mb-8 border border-gray-100">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">🍪 จัดการสต็อกสินค้า</h2>
+                <button onclick="toggleAddProductModal()" class="bg-pink-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-pink-600 transition transform hover:-translate-y-0.5">➕ เพิ่มสินค้าใหม่</button>
+            </div>
+            <div id="admin-product-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div class="mt-6 text-right">
+                <button onclick="resetStock()" class="text-sm text-gray-400 hover:text-red-500 font-medium transition">⚠️ รีเซ็ตสินค้าทั้งหมดเป็นค่าเริ่มต้น</button>
+            </div>
+        </div>
+
+        <!-- รายการสั่งซื้อ -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-4 flex items-center gap-2">📦 รายการออเดอร์ (รอเช็กสลิปใน LINE)</h2>
+            <div class="overflow-x-auto rounded-xl border border-gray-100">
+                <table class="w-full text-left border-collapse min-w-[800px]">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-600 text-sm border-b">
+                            <th class="p-4 font-semibold">ออเดอร์</th>
+                            <th class="p-4 font-semibold">วัน-เวลา</th>
+                            <th class="p-4 font-semibold w-1/4">ข้อมูลลูกค้า</th>
+                            <th class="p-4 font-semibold">รายการคุกกี้</th>
+                            <th class="p-4 font-semibold">ยอดโอน</th>
+                            <th class="p-4 font-semibold text-center">สถานะออเดอร์</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-list" class="text-sm divide-y"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer เครดิต -->
+    <footer class="mt-8 pb-8 text-center text-sm text-gray-400">
+        <p>System created with 💻 by <a href="https://github.com/kxmxn13" target="_blank" class="font-bold text-pink-500 hover:text-pink-600 transition">kxmxn13</a></p>
+    </footer>
+
+    <!-- Modal เพิ่มสินค้าใหม่ -->
+    <div id="add-product-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6">
+            <h2 class="text-2xl font-bold mb-6 text-pink-600">✨ เพิ่มสินค้าใหม่</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">ชื่อสินค้า *</label>
+                    <input type="text" id="new-p-name" class="w-full border-2 border-gray-100 rounded-xl p-3 focus:border-pink-300 outline-none transition">
+                </div>
+                <div class="flex gap-3">
+                    <div class="flex-1">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">ราคา (บาท) *</label>
+                        <input type="number" id="new-p-price" class="w-full border-2 border-gray-100 rounded-xl p-3 focus:border-pink-300 outline-none transition">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm font-bold text-gray-700 mb-1">สต็อกที่มี *</label>
+                        <input type="number" id="new-p-stock" class="w-full border-2 border-gray-100 rounded-xl p-3 focus:border-pink-300 outline-none transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">รูปภาพ (ลิงก์ หรือชื่อไฟล์ .png)</label>
+                    <input type="text" id="new-p-img" placeholder="เช่น image.png" class="w-full border-2 border-gray-100 rounded-xl p-3 focus:border-pink-300 outline-none transition">
+                </div>
+                
+                <div class="pt-4 border-t-2 border-gray-50 mt-4">
+                    <label class="flex items-center gap-2 cursor-pointer mb-3 p-2 bg-red-50 rounded-xl">
+                        <input type="checkbox" id="new-p-limited" onchange="toggleDateFields()" class="w-5 h-5 text-pink-600 rounded">
+                        <span class="font-bold text-red-500">🌟 ตั้งเป็นสินค้า Limited Edition</span>
+                    </label>
+                    <div id="date-fields" class="hidden flex gap-3">
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-gray-500 mb-1">เริ่มขายวันที่</label>
+                            <input type="date" id="new-p-start" class="w-full border-2 border-gray-100 rounded-xl p-2 text-sm outline-none focus:border-pink-300">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold text-gray-500 mb-1">ขายถึงวันที่</label>
+                            <input type="date" id="new-p-end" class="w-full border-2 border-gray-100 rounded-xl p-2 text-sm outline-none focus:border-pink-300">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button onclick="toggleAddProductModal()" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-200 transition">ยกเลิก</button>
+                <button onclick="saveNewProduct()" class="flex-1 bg-pink-500 text-white py-3 rounded-xl font-bold hover:bg-pink-600 transition shadow-lg shadow-pink-200">บันทึกสินค้า</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defaultProducts = [
+            { id: 1, name: "Soft Cookie Pie", price: 35, stock: 4, image: "image_2.png", isLimited: false },
+            { id: 2, name: "Marshmallow Soft Cookie Pie", price: 40, stock: 6, image: "image.png", isLimited: false }
+        ];
+
+        function loadProducts() {
+            let products = JSON.parse(localStorage.getItem('mei_products')) || defaultProducts;
+            document.getElementById('admin-product-list').innerHTML = products.map((p, index) => {
+                let limitTag = p.isLimited ? `<div class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-md mt-1 inline-block font-bold">Limited: ${p.startDate} ถึง ${p.endDate}</div>` : '';
+                
+                return `
+                <div class="flex flex-col border border-gray-200 rounded-2xl p-4 bg-white shadow-sm relative group hover:border-pink-300 transition">
+                    <div class="flex gap-4 items-center">
+                        <img src="${p.image}" class="w-20 h-20 object-cover rounded-xl shadow-sm border border-gray-100" onerror="this.src='https://via.placeholder.com/150'">
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-800 text-lg leading-tight">${p.name}</p>
+                            <p class="text-pink-600 font-black">฿${p.price}</p>
+                        </div>
+                    </div>
+                    ${limitTag}
+                    <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                        <label class="text-sm font-bold text-gray-500">สต็อกคงเหลือ:</label>
+                        <input type="number" min="0" value="${p.stock}" onchange="updateStock(${index}, this.value)" class="w-24 border-2 border-gray-200 rounded-lg p-1.5 text-center font-bold focus:border-pink-400 outline-none transition">
+                    </div>
+                    <button onclick="deleteProduct(${index})" class="absolute -top-2 -right-2 text-red-500 bg-white border border-red-100 rounded-full w-8 h-8 flex items-center justify-center shadow hover:bg-red-50 hover:scale-110 transition opacity-0 group-hover:opacity-100 font-bold">✕</button>
+                </div>
+            `}).join('');
+        }
+
+        function updateStock(index, newStock) {
+            let products = JSON.parse(localStorage.getItem('mei_products')) || defaultProducts;
+            products[index].stock = parseInt(newStock);
+            localStorage.setItem('mei_products', JSON.stringify(products));
+        }
+
+        function deleteProduct(index) {
+            if(confirm('คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?')) {
+                let products = JSON.parse(localStorage.getItem('mei_products')) || defaultProducts;
+                products.splice(index, 1);
+                localStorage.setItem('mei_products', JSON.stringify(products));
+                loadProducts();
+            }
+        }
+
+        function toggleAddProductModal() {
+            document.getElementById('add-product-modal').classList.toggle('hidden');
+        }
+
+        function toggleDateFields() {
+            const isLimited = document.getElementById('new-p-limited').checked;
+            const dateFields = document.getElementById('date-fields');
+            if(isLimited) {
+                dateFields.classList.remove('hidden');
+            } else {
+                dateFields.classList.add('hidden');
+            }
+        }
+
+        function saveNewProduct() {
+            const name = document.getElementById('new-p-name').value;
+            const price = document.getElementById('new-p-price').value;
+            const stock = document.getElementById('new-p-stock').value;
+            let image = document.getElementById('new-p-img').value;
+            const isLimited = document.getElementById('new-p-limited').checked;
+            const startDate = document.getElementById('new-p-start').value;
+            const endDate = document.getElementById('new-p-end').value;
+
+            if(!name || !price || !stock) return alert('กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน');
+            if(isLimited && (!startDate || !endDate)) return alert('กรุณาระบุวันที่เริ่มและวันสิ้นสุด');
+            if(!image) image = "https://via.placeholder.com/400x300?text=Mei+Bakery";
+
+            const newProduct = {
+                id: Date.now(),
+                name: name,
+                price: parseInt(price),
+                stock: parseInt(stock),
+                image: image,
+                isLimited: isLimited,
+                startDate: isLimited ? startDate : null,
+                endDate: isLimited ? endDate : null
+            };
+
+            let products = JSON.parse(localStorage.getItem('mei_products')) || defaultProducts;
+            products.push(newProduct);
+            localStorage.setItem('mei_products', JSON.stringify(products));
+
+            document.getElementById('new-p-name').value = '';
+            document.getElementById('new-p-price').value = '';
+            document.getElementById('new-p-stock').value = '';
+            document.getElementById('new-p-img').value = '';
+            document.getElementById('new-p-limited').checked = false;
+            document.getElementById('new-p-start').value = '';
+            document.getElementById('new-p-end').value = '';
+            toggleDateFields();
+            
+            toggleAddProductModal();
+            loadProducts();
+        }
+
+        function resetStock() {
+            if(confirm('⚠️ คำเตือน: สินค้าที่เพิ่มใหม่จะหายหมด และกลับไปเป็น 2 เมนูเริ่มต้น ยืนยันหรือไม่?')) {
+                localStorage.setItem('mei_products', JSON.stringify(defaultProducts));
+                loadProducts();
+            }
+        }
+
+        function loadOrders() {
+            const orders = JSON.parse(localStorage.getItem('mei_orders')) || [];
+            const list = document.getElementById('order-list');
+            
+            if (orders.length === 0) {
+                list.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-gray-400 font-medium">ยังไม่มีรายการสั่งซื้อเข้ามาเลยค้าบ</td></tr>`;
+                return;
+            }
+
+            list.innerHTML = orders.reverse().map((o, index) => {
+                const actualIndex = orders.length - 1 - index;
+                const itemsHtml = o.items.map(i => `<div class="text-sm font-medium text-gray-700">• ${i.name} <span class="text-pink-500 font-bold">x${i.qty}</span></div>`).join('');
+                
+                return `
+                <tr class="hover:bg-pink-50/50 transition">
+                    <td class="p-4">
+                        <span class="bg-gray-100 text-gray-700 font-bold px-3 py-1 rounded-lg">#${o.id}</span>
+                    </td>
+                    <td class="p-4 text-gray-500 text-xs font-medium whitespace-nowrap">${o.date}</td>
+                    <td class="p-4">
+                        <div class="font-bold text-gray-800 whitespace-pre-wrap leading-tight">${o.customer}</div>
+                        ${o.message !== '-' ? `<div class="mt-2 text-xs bg-yellow-100 text-yellow-800 p-2 rounded-lg inline-block border border-yellow-200 shadow-sm font-medium">📝 รีเควส: ${o.message}</div>` : ''}
+                    </td>
+                    <td class="p-4">${itemsHtml}</td>
+                    <td class="p-4">
+                        <div class="font-black text-pink-600 text-lg">฿${o.total}</div>
+                        ${o.shippingFee > 0 ? `<div class="text-xs text-gray-400 font-medium">(ค่าส่ง ฿${o.shippingFee})</div>` : '<div class="text-xs text-green-500 font-bold">(ส่งฟรี)</div>'}
+                    </td>
+                    <td class="p-4 text-center">
+                        <select onchange="updateOrderStatus(${actualIndex}, this.value)" class="border-2 rounded-xl p-2 text-sm font-bold outline-none cursor-pointer shadow-sm
+                            ${o.status === 'จัดส่งแล้ว' ? 'bg-green-50 text-green-700 border-green-200' : 
+                              o.status === 'เตรียมจัดส่ง' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
+                              'bg-yellow-50 text-yellow-700 border-yellow-200'}">
+                            <option value="รอตรวจสอบสลิป" ${o.status === 'รอตรวจสอบสลิป' ? 'selected' : ''}>⏳ รอตรวจสอบสลิป</option>
+                            <option value="เตรียมจัดส่ง" ${o.status === 'เตรียมจัดส่ง' ? 'selected' : ''}>📦 เตรียมจัดส่ง</option>
+                            <option value="จัดส่งแล้ว" ${o.status === 'จัดส่งแล้ว' ? 'selected' : ''}>✅ จัดส่งแล้ว</option>
+                        </select>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function updateOrderStatus(index, newStatus) {
+            let orders = JSON.parse(localStorage.getItem('mei_orders')) || [];
+            orders[index].status = newStatus;
+            localStorage.setItem('mei_orders', JSON.stringify(orders));
+            loadOrders(); 
+        }
+
+        loadProducts();
+        loadOrders();
+
+        window.addEventListener('storage', () => {
+            loadProducts();
+            loadOrders();
+        });
+    </script>
+</body>
+</html>
